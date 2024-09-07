@@ -23,6 +23,10 @@ public class Ticket extends PkBaseEntity {
     @ManyToOne
     private User user = null;
 
+    @JoinColumn(name = "category_fk", referencedColumnName = "pk", nullable = false)
+    @ManyToOne
+    private Category category = null;
+
     @Column(name = "icso_type", nullable = false)
     private IcsoType type = IcsoType.INFORMATION;
 
@@ -52,6 +56,14 @@ public class Ticket extends PkBaseEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public IcsoType getType() {
