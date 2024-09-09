@@ -89,7 +89,8 @@ public class IcsoRest implements Serializable {
             throw new NoDataException(String.format("No se ha encontrado un ticket con el token", ticketToken));
         }
 
-        return ResponseEntity.ok(new TicketResponseVO(ticket));
+        List<String> attachments = ticketManager.getAttachmentsTokens(ticket);
+        return ResponseEntity.ok(new TicketResponseVO(ticket, attachments));
     }
 
     @Operation(summary = "Obtiene todos los tickets de una categoría", description = "Retorna una lista de tickets asociados a la categoría especificada.")
@@ -126,7 +127,8 @@ public class IcsoRest implements Serializable {
 
         List<TicketResponseVO> vos = new ArrayList<>();
         for (Ticket ticket : tickets) {
-            vos.add(new TicketResponseVO(ticket));
+            List<String> attachments = ticketManager.getAttachmentsTokens(ticket);
+            vos.add(new TicketResponseVO(ticket, attachments));
         }
 
         return ResponseEntity.ok(vos);

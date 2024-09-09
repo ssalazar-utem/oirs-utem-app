@@ -29,6 +29,13 @@ public class ResponseVO extends Seba {
         this.date = Instant.now();
     }
 
+    public ResponseVO(String token, String detail) {
+        this.success = true;
+        this.token = token;
+        this.detail = detail;
+        this.date = Instant.now();
+    }
+
     public ResponseVO(Ticket ticket) {
         this.success = true;
         this.token = ticket.getToken();

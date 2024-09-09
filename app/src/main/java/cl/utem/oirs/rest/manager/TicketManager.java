@@ -88,9 +88,6 @@ public class TicketManager implements Serializable {
                 // Guardar el adjunto
                 Attachment saved = attachmentRepository.save(attachment);
                 token = saved.getToken();
-
-                // Eliminar el archivo solo si se guarda correctamente
-                FileUtils.deleteQuietly(file);
             }
         }
         return token;
