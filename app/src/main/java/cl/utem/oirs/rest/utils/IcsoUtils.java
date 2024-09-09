@@ -102,4 +102,12 @@ public class IcsoUtils implements Serializable {
                 return false;
         }
     }
+
+    public static String getAttachmentToken(final String ticketToken) {
+        String attTkn = randomAlphanumeric(47);
+        if (StringUtils.isNotBlank(attTkn)) {
+            attTkn = StringUtils.substring(String.format("%s-%s", ticketToken, randomAlphanumeric(47)), 0, 47);
+        }
+        return attTkn;
+    }
 }

@@ -79,4 +79,20 @@ CREATE TABLE history (
     PRIMARY KEY (pk)
 );
 
+
+
+DROP TABLE IF EXISTS attachments CASCADE;
+CREATE TABLE attachments (
+    pk bigserial NOT NULL,
+    token varchar(255) NOT NULL,
+    ticket_fk bigint NOT NULL,
+    mime varchar(255) NOT NULL,
+    content bytea NOT NULL,
+    created timestamptz NOT NULL DEFAULT NOW(),
+    updated timestamptz NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (ticket_fk) REFERENCES tickets(pk) ON UPDATE CASCADE ON DELETE CASCADE,
+    PRIMARY KEY (pk)
+);
+CREATE UNIQUE INDEX att_tkn_uidx ON attachments(token);
+
 COMMIT;

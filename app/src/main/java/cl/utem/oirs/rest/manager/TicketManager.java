@@ -2,18 +2,24 @@ package cl.utem.oirs.rest.manager;
 
 import cl.utem.oirs.rest.domain.enums.IcsoStatus;
 import cl.utem.oirs.rest.domain.enums.IcsoType;
+import cl.utem.oirs.rest.domain.model.Attachment;
 import cl.utem.oirs.rest.domain.model.Category;
 import cl.utem.oirs.rest.domain.model.History;
 import cl.utem.oirs.rest.domain.model.Ticket;
 import cl.utem.oirs.rest.domain.model.User;
+import cl.utem.oirs.rest.domain.repository.AttachmentRepository;
 import cl.utem.oirs.rest.domain.repository.CategoryRepository;
 import cl.utem.oirs.rest.domain.repository.HistoryRepository;
 import cl.utem.oirs.rest.domain.repository.TicketRepository;
 import cl.utem.oirs.rest.utils.IcsoUtils;
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,25 +31,76 @@ import org.springframework.transaction.annotation.Transactional;
 public class TicketManager implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private final transient AttachmentRepository attachmentRepository;
     private final transient CategoryRepository categoryRepository;
     private final transient HistoryRepository historyRepository;
     private final transient TicketRepository ticketRepository;
     private static final Logger LOGGER = LoggerFactory.getLogger(TicketManager.class);
 
     @Autowired
-    public TicketManager(CategoryRepository categoryRepository,
+    public TicketManager(AttachmentRepository attachmentRepository,
+            CategoryRepository categoryRepository,
             HistoryRepository historyRepository,
             TicketRepository ticketRepository) {
+        this.attachmentRepository = attachmentRepository;
         this.categoryRepository = categoryRepository;
         this.historyRepository = historyRepository;
         this.ticketRepository = ticketRepository;
     }
 
-    private void saveHistory(Ticket ticket) {
+    public Attachment getAttachment(final String token) {
+        Attachment attachment = null;
+        if (StringUtils.isNotBlank(token)) {
+            attachment = attachmentRepository.findByToken(token);
+        }
+        return attachment;
+    }
+
+    public List<String> getAttachmentsTokens(final Ticket ticket) {
+        List<String> list = new ArrayList<>();
+        if (ticket != null) {
+            list = attachmentRepository.searchTokenByTicket(ticket);
+        }
+        return list;
+    }
+
+    @Transactional
+    public String attach(Ticket ticket, File file) throws IOException {
+        String token = StringUtils.EMPTY;
+        if (ticket != null && file != null && file.exists()) {
+            byte[] data = FileUtils.readFileToByteArray(file);
+            if (data != null && data.length > 0) {
+                // Obtener el tipo MIME del archivo
+                String mime = Files.probeContentType(file.toPath());
+                if (StringUtils.isBlank(mime)) {
+                    // Tipo por defecto si no se detecta el MIME
+                    mime = "application/octet-stream";
+                }
+
+                // Crear el adjunto
+                Attachment attachment = new Attachment();
+                attachment.setContent(data);
+                attachment.setMime(mime);
+                attachment.setTicket(ticket);
+                attachment.setToken(IcsoUtils.getAttachmentToken(ticket.getToken()));
+
+                // Guardar el adjunto
+                Attachment saved = attachmentRepository.save(attachment);
+                token = saved.getToken();
+
+                // Eliminar el archivo solo si se guarda correctamente
+                FileUtils.deleteQuietly(file);
+            }
+        }
+        return token;
+    }
+
+    private void saveHistory(final Ticket ticket) {
         saveHistory(ticket, null);
     }
 
-    private void saveHistory(Ticket ticket, User staff) {
+    private void saveHistory(final Ticket ticket, final User staff) {
         if (ticket != null) {
             History history = new History();
             history.setCreated(ticket.getCreated());
