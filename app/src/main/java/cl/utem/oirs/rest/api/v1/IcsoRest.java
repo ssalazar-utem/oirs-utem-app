@@ -13,6 +13,11 @@ import cl.utem.oirs.rest.exception.ValidationException;
 import cl.utem.oirs.rest.manager.AuthManager;
 import cl.utem.oirs.rest.manager.TicketManager;
 import cl.utem.oirs.rest.utils.IcsoUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -25,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -56,6 +62,15 @@ public class IcsoRest implements Serializable {
         this.ticketManager = ticketManager;
     }
 
+    @Operation(summary = "Obtiene el ticket por token", description = "Retorna el ticket asociado al token proporcionado.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Ticket encontrado",
+                content = @Content(schema = @Schema(implementation = TicketResponseVO.class))),
+        @ApiResponse(responseCode = "404", description = "Ticket no encontrado",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "401", description = "No autorizado",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @GetMapping(value = "/{ticketToken}/ticket",
             consumes = {MediaType.ALL_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
@@ -77,6 +92,15 @@ public class IcsoRest implements Serializable {
         return ResponseEntity.ok(new TicketResponseVO(ticket));
     }
 
+    @Operation(summary = "Obtiene todos los tickets de una categoría", description = "Retorna una lista de tickets asociados a la categoría especificada.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Tickets encontrados",
+                content = @Content(schema = @Schema(implementation = TicketResponseVO.class))),
+        @ApiResponse(responseCode = "404", description = "Categoría no encontrada o sin tickets",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "401", description = "No autorizado",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @GetMapping(value = "/{categoryToken}/tickets",
             consumes = {MediaType.ALL_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
@@ -108,6 +132,17 @@ public class IcsoRest implements Serializable {
         return ResponseEntity.ok(vos);
     }
 
+    @Operation(summary = "Crea un nuevo ticket", description = "Permite la creación de un ticket en una categoría específica.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Ticket creado",
+                content = @Content(schema = @Schema(implementation = ResponseVO.class))),
+        @ApiResponse(responseCode = "400", description = "Error de validación",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "401", description = "No autorizado",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "404", description = "Categoría no encontrada",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @PostMapping(value = "/{categoryToken}/ticket",
             consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
@@ -146,6 +181,17 @@ public class IcsoRest implements Serializable {
         return ResponseEntity.status(HttpStatus.CREATED).body(vo);
     }
 
+    @Operation(summary = "Actualiza un ticket existente", description = "Permite la actualización de un ticket ya creado.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "202", description = "Ticket actualizado",
+                content = @Content(schema = @Schema(implementation = ResponseVO.class))),
+        @ApiResponse(responseCode = "400", description = "Error de validación",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "401", description = "No autorizado",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "404", description = "Ticket o categoría no encontrados",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @PutMapping(value = "/{categoryToken}/{ticketToken}/ticket",
             consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
@@ -200,11 +246,19 @@ public class IcsoRest implements Serializable {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(vo);
     }
 
+    @Operation(summary = "Elimina un ticket", description = "Permite la eliminación de un ticket existente.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Ticket eliminado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Ticket no encontrado",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "401", description = "No autorizado",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @DeleteMapping(value = "/{ticketToken}/ticket",
             consumes = {MediaType.ALL_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<ResponseVO> deleteTicket(HttpServletRequest request,
+    public ResponseEntity<Void> deleteTicket(HttpServletRequest request,
             @RequestHeader(name = "Authorization", required = true) String authorization,
             @PathVariable(name = "ticketToken") String ticketToken) {
 
@@ -215,9 +269,9 @@ public class IcsoRest implements Serializable {
 
         final boolean deleted = ticketManager.deleteTicket(ticketToken);
         if (!deleted) {
-            throw new NoDataException(String.format("No se ha encontrado un ticket con el token", ticketToken));
+            throw new NoDataException(String.format("No se ha encontrado un ticket con el token %s", ticketToken));
         }
 
-        return ResponseEntity.ok(new ResponseVO(ticketToken));
+        return ResponseEntity.noContent().build();  // Usar 204 No Content
     }
 }

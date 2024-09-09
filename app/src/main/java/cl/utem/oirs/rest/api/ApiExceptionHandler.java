@@ -20,6 +20,14 @@ public class ApiExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
+    /**
+     * Método que genera un ProblemDetail con la información de la excepción.
+     *
+     * @param request La solicitud HTTP
+     * @param status El estado HTTP que será retornado
+     * @param e La excepción lanzada
+     * @return Un ProblemDetail con detalles del error
+     */
     private ProblemDetail makeProblemDetail(HttpServletRequest request, HttpStatus status, Exception e) {
         final URI type = URI.create("https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/" + status.value());
         final String detail = StringUtils.trimToEmpty(e.getLocalizedMessage());

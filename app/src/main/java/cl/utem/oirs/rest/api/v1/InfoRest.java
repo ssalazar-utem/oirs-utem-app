@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,8 +57,10 @@ public class InfoRest implements Serializable {
                 content = {
                     @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CategoryVO.class))}),
-        @ApiResponse(responseCode = "401", description = "No autorizado, el token es inválido o falta autenticación"),
-        @ApiResponse(responseCode = "404", description = "No se encontraron categorías disponibles")
+        @ApiResponse(responseCode = "401", description = "No autorizado, el token es inválido o falta autenticación",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "404", description = "No se encontraron categorías disponibles",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping(value = "/categories",
             consumes = {MediaType.ALL_VALUE},
@@ -90,8 +93,10 @@ public class InfoRest implements Serializable {
                 content = {
                     @Content(mediaType = "application/json",
                             schema = @Schema(implementation = IcsoType.class))}),
-        @ApiResponse(responseCode = "401", description = "No autorizado, el token es inválido o falta autenticación"),
-        @ApiResponse(responseCode = "404", description = "No se encontraron tipos disponibles")
+        @ApiResponse(responseCode = "401", description = "No autorizado, el token es inválido o falta autenticación",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "404", description = "No se encontraron tipos disponibles",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping(value = "/types",
             consumes = {MediaType.ALL_VALUE},
@@ -119,8 +124,10 @@ public class InfoRest implements Serializable {
                 content = {
                     @Content(mediaType = "application/json",
                             schema = @Schema(implementation = IcsoStatus.class))}),
-        @ApiResponse(responseCode = "401", description = "No autorizado, el token es inválido o falta autenticación"),
-        @ApiResponse(responseCode = "404", description = "No se encontraron estados disponibles")
+        @ApiResponse(responseCode = "401", description = "No autorizado, el token es inválido o falta autenticación",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "404", description = "No se encontraron estados disponibles",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping(value = "/status",
             consumes = {MediaType.ALL_VALUE},
