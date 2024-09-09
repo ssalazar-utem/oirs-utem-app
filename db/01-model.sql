@@ -62,4 +62,21 @@ CREATE UNIQUE INDEX tck_tkn_uidx ON tickets(token);
 CREATE INDEX tck_usr_idx ON tickets(user_fk);
 CREATE INDEX tck_cat_idx ON tickets(category_fk);
 
+
+
+DROP TABLE IF EXISTS history CASCADE;
+CREATE TABLE history (
+    pk bigserial NOT NULL,
+    token varchar(255) NOT NULL,
+    status varchar(255) NOT NULL,
+    user_email varchar(255) NOT NULL,
+    subject varchar(255) NOT NULL,
+    message text NOT NULL,
+    staff_email varchar(255),
+    response text,
+    created timestamptz NOT NULL DEFAULT NOW(),
+    updated timestamptz NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (pk)
+);
+
 COMMIT;

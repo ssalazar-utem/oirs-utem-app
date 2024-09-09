@@ -192,24 +192,18 @@ public class IcsoRest implements Serializable {
         @ApiResponse(responseCode = "404", description = "Ticket o categoría no encontrados",
                 content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @PutMapping(value = "/{categoryToken}/{ticketToken}/ticket",
+    @PutMapping(value = "/{ticketToken}/ticket",
             consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<ResponseVO> updateTicket(HttpServletRequest request,
             @RequestHeader(name = "Authorization", required = true) String authorization,
-            @PathVariable(name = "categoryToken") String categoryToken,
             @PathVariable(name = "ticketToken") String ticketToken,
             @RequestBody TicketRequestVO body) {
 
         final User user = authManager.authenticate(request, authorization);
         if (user == null) {
             throw new AuthException();
-        }
-
-        final Category category = ticketManager.getCategory(categoryToken);
-        if (category == null) {
-            throw new NoDataException(String.format("No se ha encontrado la categoría con token %s", categoryToken));
         }
 
         Ticket ticket = ticketManager.getTicket(ticketToken);

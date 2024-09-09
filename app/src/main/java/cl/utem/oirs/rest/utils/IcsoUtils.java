@@ -1,5 +1,8 @@
 package cl.utem.oirs.rest.utils;
 
+import cl.utem.oirs.rest.domain.enums.IcsoStatus;
+import static cl.utem.oirs.rest.domain.enums.IcsoStatus.PENDING_INFORMATION;
+import static cl.utem.oirs.rest.domain.enums.IcsoStatus.RESOLVED;
 import cl.utem.oirs.rest.domain.enums.IcsoType;
 import java.io.Serializable;
 import java.security.SecureRandom;
@@ -66,5 +69,37 @@ public class IcsoUtils implements Serializable {
     public static IcsoType getType(final String txt) {
         final String typeStr = StringUtils.upperCase(StringUtils.trimToEmpty(txt));
         return IcsoType.valueOf(typeStr);
+    }
+
+    public static IcsoStatus getStatus(final String txt) {
+        final String statusStr = StringUtils.upperCase(StringUtils.trimToEmpty(txt));
+        return IcsoStatus.valueOf(statusStr);
+    }
+
+    public static boolean canChangeStatus(IcsoStatus from, IcsoStatus to) {
+        if (from == null || to == null) {
+            return false;
+        }
+
+        // ERROR, RECEIVED, UNDER_REVIEW, IN_PROGRESS, PENDING_INFORMATION, RESOLVED, CLOSED, REJECTED, CANCELLED
+        switch (from) {
+            case RECEIVED:
+                return IcsoStatus.UNDER_REVIEW.equals(to) || IcsoStatus.IN_PROGRESS.equals(to) || IcsoStatus.CANCELLED.equals(to);
+
+            case UNDER_REVIEW:
+                return IcsoStatus.IN_PROGRESS.equals(to) || IcsoStatus.CANCELLED.equals(to);
+
+            case IN_PROGRESS:
+                return IcsoStatus.PENDING_INFORMATION.equals(to) || IcsoStatus.RESOLVED.equals(to) || IcsoStatus.REJECTED.equals(to) || IcsoStatus.CANCELLED.equals(to);
+
+            case PENDING_INFORMATION:
+                return IcsoStatus.RESOLVED.equals(to) || IcsoStatus.REJECTED.equals(to) || IcsoStatus.CANCELLED.equals(to);
+
+            case RESOLVED:
+                return IcsoStatus.CLOSED.equals(to);
+
+            default:
+                return false;
+        }
     }
 }

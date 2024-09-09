@@ -3,9 +3,11 @@ package cl.utem.oirs.rest.manager;
 import cl.utem.oirs.rest.domain.enums.IcsoStatus;
 import cl.utem.oirs.rest.domain.enums.IcsoType;
 import cl.utem.oirs.rest.domain.model.Category;
+import cl.utem.oirs.rest.domain.model.History;
 import cl.utem.oirs.rest.domain.model.Ticket;
 import cl.utem.oirs.rest.domain.model.User;
 import cl.utem.oirs.rest.domain.repository.CategoryRepository;
+import cl.utem.oirs.rest.domain.repository.HistoryRepository;
 import cl.utem.oirs.rest.domain.repository.TicketRepository;
 import cl.utem.oirs.rest.utils.IcsoUtils;
 import java.io.Serializable;
@@ -24,13 +26,41 @@ public class TicketManager implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private final transient CategoryRepository categoryRepository;
+    private final transient HistoryRepository historyRepository;
     private final transient TicketRepository ticketRepository;
     private static final Logger LOGGER = LoggerFactory.getLogger(TicketManager.class);
 
     @Autowired
-    public TicketManager(CategoryRepository categoryRepository, TicketRepository ticketRepository) {
+    public TicketManager(CategoryRepository categoryRepository,
+            HistoryRepository historyRepository,
+            TicketRepository ticketRepository) {
         this.categoryRepository = categoryRepository;
+        this.historyRepository = historyRepository;
         this.ticketRepository = ticketRepository;
+    }
+
+    private void saveHistory(Ticket ticket) {
+        saveHistory(ticket, null);
+    }
+
+    private void saveHistory(Ticket ticket, User staff) {
+        if (ticket != null) {
+            History history = new History();
+            history.setCreated(ticket.getCreated());
+            history.setMessage(ticket.getMessage());
+            history.setStatus(ticket.getStatus().name());
+            history.setSubject(ticket.getSubject());
+            history.setToken(ticket.getToken());
+            history.setUpdated(ticket.getUpdated());
+            history.setUserEmail(ticket.getUser().getEmail());
+
+            if (staff != null) {
+                history.setResponse(ticket.getResponse());
+                history.setStaffEmail(staff.getEmail());
+            }
+
+            historyRepository.save(history);
+        }
     }
 
     public Category getCategory(final String token) {
@@ -77,7 +107,9 @@ public class TicketManager implements Serializable {
         ticket.setCreated(now);
         ticket.setUpdated(now);
 
-        return ticketRepository.save(ticket);
+        Ticket created = ticketRepository.save(ticket);
+        saveHistory(created);
+        return created;
     }
 
     @Transactional
@@ -85,6 +117,7 @@ public class TicketManager implements Serializable {
         Ticket saved = null;
         if (ticket != null) {
             saved = ticketRepository.save(ticket);
+            saveHistory(saved);
         }
         return saved;
     }
@@ -100,5 +133,15 @@ public class TicketManager implements Serializable {
             }
         }
         return deleted;
+    }
+
+    @Transactional
+    public Ticket response(User staffUser, Ticket ticket) {
+        Ticket responsed = null;
+        if (staffUser != null && ticket != null) {
+            responsed = ticketRepository.save(ticket);
+            saveHistory(ticket, staffUser);
+        }
+        return responsed;
     }
 }
