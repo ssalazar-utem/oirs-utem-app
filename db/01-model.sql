@@ -20,6 +20,7 @@ CREATE TABLE access (
     email varchar(255) NOT NULL,
     ip varchar(255) NOT NULL,
     user_agent text NOT NULL,
+    request_uri text NOT NULL,
     created timestamptz NOT NULL DEFAULT NOW(),
     updated timestamptz NOT NULL DEFAULT NOW(),
     PRIMARY KEY (pk)

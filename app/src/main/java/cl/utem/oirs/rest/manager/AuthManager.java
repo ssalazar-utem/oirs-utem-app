@@ -6,6 +6,8 @@ import cl.utem.oirs.rest.domain.model.User;
 import cl.utem.oirs.rest.domain.repository.AccessRepository;
 import cl.utem.oirs.rest.domain.repository.UserRepository;
 import cl.utem.oirs.rest.utils.GoogleAuthUtils;
+import cl.utem.oirs.rest.utils.IpUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +29,27 @@ public class AuthManager implements Serializable {
         this.userRepository = userRepository;
     }
 
+    private void saveAccess(HttpServletRequest request, User user) {
+        if (request != null && user != null) {
+            final String ip = IpUtils.getClientIp(request);
+            final String userAgent = StringUtils.trimToEmpty(request.getHeader("User-Agent"));
+            final String request_uri = StringUtils.trimToEmpty(request.getRequestURI());
+
+            if (!StringUtils.isAnyBlank(ip, userAgent, request_uri)) {
+                Access access = new Access();
+                access.setEmail(user.getEmail());
+                access.setIp(ip);
+                access.setRequestUri(request_uri);
+                access.setUserAgent(userAgent);
+                access.setCreated(user.getUpdated());
+                access.setUpdated(user.getUpdated());
+                accessRepository.save(access);
+            }
+        }
+    }
+
     @Transactional
-    public User authenticate(final String authorization, final String ip, final String userAgent) {
+    public User authenticate(HttpServletRequest request, final String authorization) {
         User user = null;
         if (StringUtils.isNotBlank(authorization)) {
             final OffsetDateTime now = OffsetDateTime.now();
@@ -46,15 +67,7 @@ public class AuthManager implements Serializable {
                 current.setUpdated(now);
             }
             user = userRepository.save(current);
-            if (!StringUtils.isAnyBlank(ip, userAgent)) {
-                Access access = new Access();
-                access.setEmail(user.getEmail());
-                access.setIp(ip);
-                access.setUserAgent(userAgent);
-                access.setCreated(now);
-                access.setUpdated(now);
-                accessRepository.save(access);
-            }
+            saveAccess(request, user);
         }
         return user;
     }

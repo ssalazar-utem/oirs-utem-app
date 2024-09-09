@@ -17,6 +17,9 @@ public class Access extends PkBaseEntity {
     @Column(name = "user_agent", nullable = false)
     private String userAgent = null;
 
+    @Column(name = "request_uri", nullable = false)
+    private String requestUri = null;
+
     public String getEmail() {
         return email;
     }
@@ -39,5 +42,13 @@ public class Access extends PkBaseEntity {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public String getRequestUri() {
+        return requestUri;
+    }
+
+    public void setRequestUri(String requestUri) {
+        this.requestUri = requestUri;
     }
 }

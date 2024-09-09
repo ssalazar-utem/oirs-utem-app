@@ -24,6 +24,13 @@ public class ResponseVO extends Seba {
         this.date = Instant.now();
     }
 
+    public ResponseVO(final String token) {
+        this.success = true;
+        this.token = token;
+        this.detail = String.format("Se ha eliminado el registro con token %s", token);
+        this.date = Instant.now();
+    }
+
     public ResponseVO(Ticket ticket) {
         this.success = true;
         this.token = ticket.getToken();

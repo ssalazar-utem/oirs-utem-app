@@ -1,6 +1,7 @@
 package cl.utem.oirs.rest.api;
 
 import cl.utem.oirs.rest.exception.AuthException;
+import cl.utem.oirs.rest.exception.BadRoleException;
 import cl.utem.oirs.rest.exception.NoDataException;
 import cl.utem.oirs.rest.exception.ValidationException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,6 +42,15 @@ public class ApiExceptionHandler {
 
         ProblemDetail body = makeProblemDetail(request, HttpStatus.UNAUTHORIZED, e);
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler({BadRoleException.class})
+    public ResponseEntity<ProblemDetail> handleException(HttpServletRequest request, BadRoleException e) {
+        LOGGER.error("Error de permisos: {}", e.getLocalizedMessage());
+        LOGGER.debug("Error de permisos: {}", e.getMessage(), e);
+
+        ProblemDetail body = makeProblemDetail(request, HttpStatus.FORBIDDEN, e);
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({NoDataException.class})

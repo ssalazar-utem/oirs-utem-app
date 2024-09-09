@@ -9,13 +9,17 @@ import cl.utem.oirs.rest.exception.AuthException;
 import cl.utem.oirs.rest.exception.NoDataException;
 import cl.utem.oirs.rest.manager.AuthManager;
 import cl.utem.oirs.rest.manager.TicketManager;
-import cl.utem.oirs.rest.utils.IpUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +30,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import java.util.Arrays;
 
 @CrossOrigin
 @RestController
@@ -67,9 +65,7 @@ public class InfoRest implements Serializable {
     )
     public ResponseEntity<List<CategoryVO>> allCategories(HttpServletRequest request,
             @RequestHeader(name = "Authorization", required = true) String authorization) {
-        final String ip = IpUtils.getClientIp(request);
-        final String userAgent = StringUtils.trimToEmpty(request.getHeader("User-Agent"));
-        User user = authManager.authenticate(authorization, ip, userAgent);
+        final User user = authManager.authenticate(request, authorization);
         if (user == null) {
             throw new AuthException();
         }
@@ -103,9 +99,7 @@ public class InfoRest implements Serializable {
     )
     public ResponseEntity<List<IcsoType>> allTypes(HttpServletRequest request,
             @RequestHeader(name = "Authorization", required = true) String authorization) {
-        final String ip = IpUtils.getClientIp(request);
-        final String userAgent = StringUtils.trimToEmpty(request.getHeader("User-Agent"));
-        User user = authManager.authenticate(authorization, ip, userAgent);
+        final User user = authManager.authenticate(request, authorization);
         if (user == null) {
             throw new AuthException();
         }
@@ -134,9 +128,7 @@ public class InfoRest implements Serializable {
     )
     public ResponseEntity<List<IcsoStatus>> allStatus(HttpServletRequest request,
             @RequestHeader(name = "Authorization", required = true) String authorization) {
-        final String ip = IpUtils.getClientIp(request);
-        final String userAgent = StringUtils.trimToEmpty(request.getHeader("User-Agent"));
-        User user = authManager.authenticate(authorization, ip, userAgent);
+        final User user = authManager.authenticate(request, authorization);
         if (user == null) {
             throw new AuthException();
         }
