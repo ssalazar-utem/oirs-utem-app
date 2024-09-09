@@ -13,6 +13,12 @@ import cl.utem.oirs.rest.exception.ValidationException;
 import cl.utem.oirs.rest.manager.AuthManager;
 import cl.utem.oirs.rest.manager.TicketManager;
 import cl.utem.oirs.rest.utils.IcsoUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -22,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,6 +57,24 @@ public class ResponseRest implements Serializable {
         this.ticketManager = ticketManager;
     }
 
+    @Operation(
+            summary = "Actualiza un ticket de respuesta",
+            description = "Este endpoint permite actualizar la respuesta y el estado de un ticket existente mediante el token del ticket.",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            tags = {"Ticket", "Respuesta"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "202", description = "Ticket actualizado exitosamente",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseVO.class))),
+        @ApiResponse(responseCode = "400", description = "Error de validación en los datos ingresados",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "401", description = "Usuario no autorizado",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "403", description = "Rol de usuario no permitido para realizar la operación",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "404", description = "Ticket no encontrado",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @PutMapping(value = "/{ticketToken}/ticket",
             consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
@@ -81,8 +106,8 @@ public class ResponseRest implements Serializable {
         }
         ticket.setResponse(response);
 
-        IcsoStatus status = IcsoUtils.getStatus(body.getStatus());
-        boolean canChangeStatus = IcsoUtils.canChangeStatus(ticket.getStatus(), status);
+        final IcsoStatus status = IcsoUtils.getStatus(body.getStatus());
+        final boolean canChangeStatus = IcsoUtils.canChangeStatus(ticket.getStatus(), status);
         if (!canChangeStatus) {
             final String errStr = String.format("No se puede cambiar el estado de la solicitud ({} => {})", ticket.getToken(), ticket.getStatus(), status);
             LOGGER.error("{}", errStr);
