@@ -1,16 +1,27 @@
 package cl.utem.oirs.rest.api.vo;
 
 import cl.utem.oirs.rest.domain.model.Ticket;
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.Instant;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@Schema(description = "Objeto de transferencia de datos que representa la respuesta de un ticket.")
 public class TicketResponseVO extends TicketRequestVO {
 
+    @Schema(description = "Token único que identifica el ticket", example = "abc123")
     private String token = null;
+
+    @Schema(description = "Estado actual de la solicitud", example = "IN_PROGRESS", allowableValues = {"ERROR", "RECEIVED", "UNDER_REVIEW", "IN_PROGRESS", "PENDING_INFORMATION", "RESOLVED", "CLOSED", "REJECTED", "CANCELLED"})
     private String status = null;
+
+    @Schema(description = "Respuesta a la solicitud asociada al ticket", example = "Su solicitud ha sido recibida y está siendo procesada.")
     private String response = null;
+
+    @Schema(description = "Fecha y hora en la que se creó el ticket", example = "2024-09-09T12:45:30Z")
     private Instant created = null;
+
+    @Schema(description = "Fecha y hora de la última actualización del ticket", example = "2024-09-10T12:45:30Z")
     private Instant updated = null;
 
     public TicketResponseVO(Ticket ticket) {

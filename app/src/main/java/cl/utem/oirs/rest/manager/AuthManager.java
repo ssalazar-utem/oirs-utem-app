@@ -10,6 +10,8 @@ import cl.utem.oirs.rest.utils.IpUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,5 +72,13 @@ public class AuthManager implements Serializable {
             saveAccess(request, user);
         }
         return user;
+    }
+
+    public List<Access> getAccess(final User user) {
+        List<Access> list = new ArrayList<>();
+        if (user != null) {
+            list = accessRepository.findByEmailIgnoreCase(user.getEmail());
+        }
+        return list;
     }
 }

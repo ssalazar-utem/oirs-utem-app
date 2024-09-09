@@ -57,12 +57,7 @@ public class ResponseRest implements Serializable {
         this.ticketManager = ticketManager;
     }
 
-    @Operation(
-            summary = "Actualiza un ticket de respuesta",
-            description = "Este endpoint permite actualizar la respuesta y el estado de un ticket existente mediante el token del ticket.",
-            security = @SecurityRequirement(name = "bearerAuth"),
-            tags = {"Ticket", "Respuesta"}
-    )
+    @Operation(summary = "Actualiza un ticket de respuesta", description = "Este endpoint permite actualizar la respuesta y el estado de un ticket existente mediante el token del ticket.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "202", description = "Ticket actualizado exitosamente",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseVO.class))),
@@ -79,7 +74,7 @@ public class ResponseRest implements Serializable {
             consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ResponseEntity<ResponseVO> updateTicket(HttpServletRequest request,
+    public ResponseEntity<ResponseVO> responseTicket(HttpServletRequest request,
             @RequestHeader(name = "Authorization", required = true) String authorization,
             @PathVariable(name = "ticketToken") String ticketToken,
             @RequestBody CurrentResponse body) {

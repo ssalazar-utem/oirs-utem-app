@@ -163,7 +163,7 @@ public class IcsoRest implements Serializable {
         }
 
         final IcsoType type = IcsoUtils.getType(body.getType());
-        if (type != null) {
+        if (type == null) {
             throw new ValidationException("Se requiere un tipo de solicitud");
         }
 

@@ -1,8 +1,10 @@
 package cl.utem.oirs.rest.api.v1;
 
+import cl.utem.oirs.rest.api.vo.AccessVO;
 import cl.utem.oirs.rest.api.vo.CategoryVO;
 import cl.utem.oirs.rest.domain.enums.IcsoStatus;
 import cl.utem.oirs.rest.domain.enums.IcsoType;
+import cl.utem.oirs.rest.domain.model.Access;
 import cl.utem.oirs.rest.domain.model.Category;
 import cl.utem.oirs.rest.domain.model.User;
 import cl.utem.oirs.rest.exception.AuthException;
@@ -147,5 +149,41 @@ public class InfoRest implements Serializable {
         LOGGER.debug("Respondiendo {} tipos de solicitudes", list.size());
 
         return ResponseEntity.ok(list);
+    }
+
+    @Operation(summary = "Obtener todas los accesos al servicio", description = "Retorna una lista de todos los accesos.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de estados de requerimientos obtenida con éxito",
+                content = {
+                    @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AccessVO.class))}),
+        @ApiResponse(responseCode = "401", description = "No autorizado, el token es inválido o falta autenticación",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "404", description = "No se encontraron estados disponibles",
+                content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    @GetMapping(value = "/access",
+            consumes = {MediaType.ALL_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<List<AccessVO>> access(HttpServletRequest request,
+            @RequestHeader(name = "Authorization", required = true) String authorization) {
+        final User user = authManager.authenticate(request, authorization);
+        if (user == null) {
+            throw new AuthException();
+        }
+
+        List<AccessVO> vos = new ArrayList<>();
+        List<Access> list = authManager.getAccess(user);
+        if (CollectionUtils.isNotEmpty(list)) {
+            java.util.Collections.sort(list);
+            for (Access a : list) {
+                vos.add(new AccessVO(a));
+            }
+        } else {
+            throw new NoDataException("No hay información de acceso para el usuario");
+        }
+
+        return ResponseEntity.ok(vos);
     }
 }
