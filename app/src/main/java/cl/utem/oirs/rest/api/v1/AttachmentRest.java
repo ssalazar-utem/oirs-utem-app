@@ -30,6 +30,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @CrossOrigin
 @RestController
@@ -37,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
         consumes = {MediaType.APPLICATION_JSON_VALUE},
         produces = {MediaType.APPLICATION_JSON_VALUE}
 )
+@Tag(name = "Attachments", description = "API para manejar archivos adjuntos asociados a tickets")
 public class AttachmentRest implements Serializable {
 
     private static final long serialVersionUID = 1;
@@ -66,6 +72,22 @@ public class AttachmentRest implements Serializable {
         return token;
     }
 
+    /**
+     * Sube un archivo adjunto asociado a un ticket.
+     *
+     * @param request la solicitud HTTP
+     * @param authorization el token de autorización del usuario
+     * @param ticketToken el token del ticket
+     * @param body los datos del archivo adjunto (nombre, mime, contenido en
+     * Base64)
+     * @return un ResponseEntity con el token del archivo subido y un mensaje de
+     * éxito
+     */
+    @Operation(summary = "Subir un archivo adjunto a un ticket", description = "Permite subir un archivo adjunto relacionado con un ticket especificado por su token.")
+    @ApiResponse(responseCode = "200", description = "Archivo subido con éxito",
+            content = @Content(schema = @Schema(implementation = ResponseVO.class)))
+    @ApiResponse(responseCode = "404", description = "Ticket no encontrado o usuario no autorizado")
+    @ApiResponse(responseCode = "400", description = "Error de validación al subir el archivo")
     @PostMapping(value = "/{ticketToken}/upload",
             consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
@@ -98,6 +120,21 @@ public class AttachmentRest implements Serializable {
         return ResponseEntity.ok(vo);
     }
 
+    /**
+     * Obtiene un archivo adjunto asociado a un ticket.
+     *
+     * @param request la solicitud HTTP
+     * @param authorization el token de autorización del usuario
+     * @param ticketToken el token del ticket
+     * @param attToken el token del archivo adjunto
+     * @return un ResponseEntity con los datos del archivo adjunto en formato
+     * Base64
+     */
+    @Operation(summary = "Obtener un archivo adjunto", description = "Recupera un archivo adjunto asociado a un ticket especificado por su token.")
+    @ApiResponse(responseCode = "200", description = "Archivo recuperado con éxito",
+            content = @Content(schema = @Schema(implementation = DataVO.class)))
+    @ApiResponse(responseCode = "404", description = "Adjunto o ticket no encontrado o usuario no autorizado")
+    @ApiResponse(responseCode = "400", description = "Error de validación al recuperar el archivo")
     @GetMapping(value = "/{ticketToken}/{attToken}",
             consumes = {MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
