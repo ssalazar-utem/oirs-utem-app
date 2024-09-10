@@ -10,17 +10,16 @@ import cl.utem.oirs.rest.exception.NoDataException;
 import cl.utem.oirs.rest.exception.ValidationException;
 import cl.utem.oirs.rest.manager.AuthManager;
 import cl.utem.oirs.rest.manager.TicketManager;
+import cl.utem.oirs.rest.utils.TikaUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.Serializable;
 import java.util.Objects;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,14 +59,17 @@ public class AttachmentRest implements Serializable {
         String token = StringUtils.EMPTY;
         try {
             if (ticket != null && body != null) {
-                File tmp = File.createTempFile(ticket.getToken(), body.getName());
-                FileUtils.writeByteArrayToFile(tmp, Base64.decodeBase64(body.getData()));
-                token = ticketManager.attach(ticket, tmp); // Eliminar el archivo solo si se guarda correctamente
-                FileUtils.deleteQuietly(tmp);
+                final byte[] data = Base64.decodeBase64(body.getData());
+                final String mimeType = TikaUtils.detectMimeType(data);
+                if (TikaUtils.isValid(mimeType)) {
+                    token = ticketManager.attach(ticket, mimeType, data);
+                    LOGGER.debug("Se ha subido el archivo {}", ticket);
+                } else {
+                    throw new ValidationException(String.format("El tipo (%s) NO es un tipo permitido en el servicio", mimeType));
+                }
             }
         } catch (Exception e) {
-            LOGGER.error("Error al subir información al servidor: {}", e.getLocalizedMessage());
-            LOGGER.debug("Error al subir información al servidor: {}", e.getMessage(), e);
+            throw new ValidationException("Error al subir adjunto", e);
         }
         return token;
     }
@@ -167,10 +169,13 @@ public class AttachmentRest implements Serializable {
             throw new ValidationException("El ticket no corresponde con el ticket del adjunto");
         }
 
+        final byte[] content = attachment.getContent();
+        final String ext = TikaUtils.detectExtension(content);
+
         DataVO vo = new DataVO();
-        vo.setData(Base64.encodeBase64String(attachment.getContent()));
+        vo.setData(Base64.encodeBase64String(content));
         vo.setMime(attachment.getMime());
-        vo.setName(attToken);
+        vo.setName(String.format("%s%s", attToken, ext));
         return ResponseEntity.ok(vo);
     }
 }

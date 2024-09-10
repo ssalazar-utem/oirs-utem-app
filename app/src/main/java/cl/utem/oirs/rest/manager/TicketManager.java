@@ -2,6 +2,7 @@ package cl.utem.oirs.rest.manager;
 
 import cl.utem.oirs.rest.domain.enums.IcsoStatus;
 import cl.utem.oirs.rest.domain.enums.IcsoType;
+import cl.utem.oirs.rest.domain.enums.UserRole;
 import cl.utem.oirs.rest.domain.model.Attachment;
 import cl.utem.oirs.rest.domain.model.Category;
 import cl.utem.oirs.rest.domain.model.History;
@@ -12,14 +13,10 @@ import cl.utem.oirs.rest.domain.repository.CategoryRepository;
 import cl.utem.oirs.rest.domain.repository.HistoryRepository;
 import cl.utem.oirs.rest.domain.repository.TicketRepository;
 import cl.utem.oirs.rest.utils.IcsoUtils;
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,30 +63,21 @@ public class TicketManager implements Serializable {
     }
 
     @Transactional
-    public String attach(Ticket ticket, File file) throws IOException {
+    public String attach(Ticket ticket, String mime, byte[] data) {
         String token = StringUtils.EMPTY;
-        if (ticket != null && file != null && file.exists()) {
-            byte[] data = FileUtils.readFileToByteArray(file);
-            if (data != null && data.length > 0) {
-                // Obtener el tipo MIME del archivo
-                String mime = Files.probeContentType(file.toPath());
-                if (StringUtils.isBlank(mime)) {
-                    // Tipo por defecto si no se detecta el MIME
-                    mime = "application/octet-stream";
-                }
-                LOGGER.debug("Tipo mime detectado: {}", mime);
+        if (ticket != null && data != null && data.length > 0 && StringUtils.isNotBlank(mime)) {
+            LOGGER.debug("Tipo mime detectado: {}", mime);
 
-                // Crear el adjunto
-                Attachment attachment = new Attachment();
-                attachment.setContent(data);
-                attachment.setMime(mime);
-                attachment.setTicket(ticket);
-                attachment.setToken(IcsoUtils.getAttachmentToken(ticket.getToken()));
+            // Crear el adjunto
+            Attachment attachment = new Attachment();
+            attachment.setContent(data);
+            attachment.setMime(mime);
+            attachment.setTicket(ticket);
+            attachment.setToken(IcsoUtils.getAttachmentToken(ticket.getToken()));
 
-                // Guardar el adjunto
-                Attachment saved = attachmentRepository.save(attachment);
-                token = saved.getToken();
-            }
+            // Guardar el adjunto
+            Attachment saved = attachmentRepository.save(attachment);
+            token = saved.getToken();
         }
         return token;
     }
@@ -138,10 +126,10 @@ public class TicketManager implements Serializable {
         return ticket;
     }
 
-    public List<Ticket> getTickets(Category category) {
+    public List<Ticket> getTickets(final Category category, final User user, final IcsoType type, final IcsoStatus status) {
         List<Ticket> tickets = new ArrayList<>();
-        if (category != null) {
-            tickets = ticketRepository.findByCategory(category);
+        if (category != null && user != null) {
+            tickets = ticketRepository.search(category, UserRole.STUDENT.equals(user.getRole()) ? user : null, type, status);
         }
         return tickets;
     }

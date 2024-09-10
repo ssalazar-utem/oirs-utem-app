@@ -3,6 +3,7 @@ package cl.utem.oirs.rest.api.v1;
 import cl.utem.oirs.rest.api.vo.ResponseVO;
 import cl.utem.oirs.rest.api.vo.TicketRequestVO;
 import cl.utem.oirs.rest.api.vo.TicketResponseVO;
+import cl.utem.oirs.rest.domain.enums.IcsoStatus;
 import cl.utem.oirs.rest.domain.enums.IcsoType;
 import cl.utem.oirs.rest.domain.model.Category;
 import cl.utem.oirs.rest.domain.model.Ticket;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin
@@ -110,19 +112,23 @@ public class IcsoRest implements Serializable {
     )
     public ResponseEntity<List<TicketResponseVO>> getTickets(HttpServletRequest request,
             @RequestHeader(name = "Authorization", required = true) String authorization,
-            @PathVariable(name = "categoryToken") String categoryToken) {
+            @PathVariable(name = "categoryToken") String categoryToken,
+            @RequestParam(name = "type") String typeStr,
+            @RequestParam(name = "status") String statusStr) {
 
         final User user = authManager.authenticate(request, authorization);
         if (user == null) {
             throw new AuthException();
         }
 
+        final IcsoType type = IcsoUtils.getType(typeStr);
+        final IcsoStatus status = IcsoUtils.getStatus(statusStr);
         final Category category = ticketManager.getCategory(categoryToken);
         if (category == null) {
             throw new NoDataException(String.format("No se ha encontrado la categoría con token %s", categoryToken));
         }
 
-        List<Ticket> tickets = ticketManager.getTickets(category);
+        List<Ticket> tickets = ticketManager.getTickets(category, user, type, status);
         if (CollectionUtils.isEmpty(tickets)) {
             throw new NoDataException(String.format("No se ha encontrado tickets en la categoría %s", category.getName()));
         }
