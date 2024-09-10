@@ -77,6 +77,7 @@ public class TicketManager implements Serializable {
                     // Tipo por defecto si no se detecta el MIME
                     mime = "application/octet-stream";
                 }
+                LOGGER.debug("Tipo mime detectado: {}", mime);
 
                 // Crear el adjunto
                 Attachment attachment = new Attachment();

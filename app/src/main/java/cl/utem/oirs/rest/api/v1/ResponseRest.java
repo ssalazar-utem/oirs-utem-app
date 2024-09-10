@@ -105,7 +105,7 @@ public class ResponseRest implements Serializable {
         final IcsoStatus status = IcsoUtils.getStatus(body.getStatus());
         final boolean canChangeStatus = IcsoUtils.canChangeStatus(ticket.getStatus(), status);
         if (!canChangeStatus) {
-            final String errStr = String.format("No se puede cambiar el estado de la solicitud ({} => {})", ticket.getToken(), ticket.getStatus(), status);
+            final String errStr = String.format("No se puede cambiar el estado de la solicitud %s (%s => %s)", ticket.getToken(), ticket.getStatus(), status);
             LOGGER.error("{}", errStr);
             throw new ValidationException(errStr);
         }

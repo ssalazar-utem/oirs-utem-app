@@ -1,8 +1,8 @@
 package cl.utem.oirs.rest.api.vo;
 
 import cl.utem.oirs.rest.domain.model.Ticket;
-import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;

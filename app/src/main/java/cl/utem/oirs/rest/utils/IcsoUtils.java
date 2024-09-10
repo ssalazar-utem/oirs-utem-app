@@ -1,8 +1,6 @@
 package cl.utem.oirs.rest.utils;
 
 import cl.utem.oirs.rest.domain.enums.IcsoStatus;
-import static cl.utem.oirs.rest.domain.enums.IcsoStatus.PENDING_INFORMATION;
-import static cl.utem.oirs.rest.domain.enums.IcsoStatus.RESOLVED;
 import cl.utem.oirs.rest.domain.enums.IcsoType;
 import java.io.Serializable;
 import java.security.SecureRandom;

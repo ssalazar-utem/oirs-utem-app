@@ -88,7 +88,7 @@ public class IcsoRest implements Serializable {
 
         Ticket ticket = ticketManager.getTicket(ticketToken);
         if (ticket == null) {
-            throw new NoDataException(String.format("No se ha encontrado un ticket con el token", ticketToken));
+            throw new NoDataException(String.format("No se ha encontrado un ticket con el token %s", ticketToken));
         }
 
         List<String> attachments = ticketManager.getAttachmentsTokens(ticket);

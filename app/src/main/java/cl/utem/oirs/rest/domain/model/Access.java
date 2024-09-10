@@ -51,4 +51,24 @@ public class Access extends PkBaseEntity {
     public void setRequestUri(String requestUri) {
         this.requestUri = requestUri;
     }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        return super.equals(obj);
+    }
 }
