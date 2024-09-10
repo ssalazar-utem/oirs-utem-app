@@ -138,7 +138,7 @@ public class AttachmentRest implements Serializable {
     @ApiResponse(responseCode = "404", description = "Adjunto o ticket no encontrado o usuario no autorizado")
     @ApiResponse(responseCode = "400", description = "Error de validación al recuperar el archivo")
     @GetMapping(value = "/{ticketToken}/{attToken}",
-            consumes = {MediaType.APPLICATION_JSON_VALUE},
+            consumes = {MediaType.ALL_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<DataVO> getAttachment(HttpServletRequest request,
