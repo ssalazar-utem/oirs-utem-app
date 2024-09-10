@@ -65,13 +65,27 @@ public class IcsoUtils implements Serializable {
     }
 
     public static IcsoType getType(final String txt) {
-        final String typeStr = StringUtils.upperCase(StringUtils.trimToEmpty(txt));
-        return IcsoType.valueOf(typeStr);
+        IcsoType type = null;
+        try {
+            if (StringUtils.isNotBlank(txt)) {
+                type = IcsoType.valueOf(StringUtils.upperCase(StringUtils.trimToEmpty(txt)));
+            }
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Valor no válido para IcsoType ({}) : {}", txt, e.getLocalizedMessage());
+        }
+        return type;
     }
 
     public static IcsoStatus getStatus(final String txt) {
-        final String statusStr = StringUtils.upperCase(StringUtils.trimToEmpty(txt));
-        return IcsoStatus.valueOf(statusStr);
+        IcsoStatus status = null;
+        try {
+            if (StringUtils.isNotBlank(txt)) {
+                status = IcsoStatus.valueOf(StringUtils.upperCase(StringUtils.trimToEmpty(txt)));
+            }
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Valor no válido para IcsoStatus ({}) : {}", txt, e.getLocalizedMessage());
+        }
+        return status;
     }
 
     public static boolean canChangeStatus(IcsoStatus from, IcsoStatus to) {
