@@ -30,7 +30,7 @@ public class OpenApiConf {
                                 )
                 )
                 .info(new Info()
-                        .title("API para reserva de salas")
+                        .title("API para sistema de información, reclamos y sugerencias")
                         .description("Aplicación de ejemplo para explicar el funcionamiento de servicios REST")
                         .version("0.9.9")
                         .contact(new Contact().email("sebasalazar@gmail.com").name("Sebastián Salazar Molina").url("https://sebastian.cl"))

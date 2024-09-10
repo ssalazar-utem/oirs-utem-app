@@ -11,6 +11,9 @@ import org.apache.commons.collections.CollectionUtils;
 @Schema(description = "Objeto de transferencia de datos que representa la respuesta de un ticket.")
 public class TicketResponseVO extends TicketRequestVO {
 
+    @Schema(description = "Categoría asociada a el ticket")
+    private CategoryVO category = null;
+
     @Schema(description = "Token único que identifica el ticket", example = "abc123")
     private String token = null;
 
@@ -33,6 +36,7 @@ public class TicketResponseVO extends TicketRequestVO {
         super.setType(ticket.getType().name());
         super.setSubject(ticket.getSubject());
         super.setMessage(ticket.getMessage());
+        this.category = new CategoryVO(ticket.getCategory());
         this.token = ticket.getToken();
         this.status = ticket.getStatus().name();
         this.response = ticket.getResponse();
@@ -41,6 +45,10 @@ public class TicketResponseVO extends TicketRequestVO {
         }
         this.created = ticket.getCreated().toInstant();
         this.updated = ticket.getUpdated().toInstant();
+    }
+
+    public CategoryVO getCategory() {
+        return category;
     }
 
     public String getToken() {

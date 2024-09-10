@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
         consumes = {MediaType.APPLICATION_JSON_VALUE},
         produces = {MediaType.APPLICATION_JSON_VALUE}
 )
+@Tag(name = "Respuestas", description = "API para gestionar respuestas de tickets")
 public class ResponseRest implements Serializable {
 
     private static final long serialVersionUID = 1;
